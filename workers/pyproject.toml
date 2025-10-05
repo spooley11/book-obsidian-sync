@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "converter-workers"
+version = "0.1.0"
+description = "Celery worker suite for converter"
+authors = ["Glued Research Ops <ops@example.com>"]
+packages = [
+  { include = "tasks" },
+  { include = "utils" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+celery = "^5.4.0"
+redis = "^5.0.4"
+pydantic = "^2.7.1"
+structlog = "^24.1.0"
+httpx = "^0.27.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0"
+pytest-dotenv = "^0.5.2"
+
+[build-system]
+requires = ["poetry-core>=1.6.0"]
+build-backend = "poetry.core.masonry.api"

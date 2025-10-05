@@ -1,0 +1,85 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: converter
+      POSTGRES_PASSWORD: converter
+      POSTGRES_DB: converter
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    working_dir: /app/apps/api
+    environment:
+      CONVERTER_APP_ENV: dev
+      CONVERTER_DATABASE_URL: postgresql+psycopg2://converter:converter@postgres:5432/converter
+      CONVERTER_REDIS_URL: redis://redis:6379/0
+      CONVERTER_OLLAMA_ENDPOINT: http://ollama:11434
+    volumes:
+      - ./:/app
+    depends_on:
+      - postgres
+      - redis
+      - ollama
+    ports:
+      - "8000:8000"
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/worker.Dockerfile
+    command: ["celery", "-A", "workers.worker", "worker", "--loglevel=INFO"]
+    working_dir: /app
+    environment:
+      CONVERTER_APP_ENV: dev
+      CONVERTER_DATABASE_URL: postgresql+psycopg2://converter:converter@postgres:5432/converter
+      CONVERTER_REDIS_URL: redis://redis:6379/0
+      CONVERTER_OLLAMA_ENDPOINT: http://ollama:11434
+    volumes:
+      - ./:/app
+    depends_on:
+      - api
+      - redis
+      - postgres
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    command: ["pnpm", "dev", "--host", "0.0.0.0", "--port", "5173"]
+    working_dir: /app/apps/web
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./:/app
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+
+volumes:
+  postgres-data:
+  ollama-data:
