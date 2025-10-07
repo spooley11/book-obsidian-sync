@@ -1,5 +1,16 @@
-# Converter AI Pipeline
+Wanted to start some coding projects that allows me to test out different code systems and various AI integreations to see where i can take it.
+This one in particular came about since i have a large library of religous books or audio files i wanted a way to compress the data easily and find the various connections. also make it more fun to upload places like notebooklm
 
+biggest issues to overcome
+- getting ollama to conversationally provide notes and add tags, had to break it up into chunks and then revisit the chunks for consistency because of the difficulty i had with the automation
+- reading the data accurately, i have a number of low quality images of texts that ocr can struggle with
+
+
+
+
+
+
+# Converter AI Pipeline
 Modular workspace for the religious studies ingestion, transcription, and summarisation toolchain.
 
 ## Quickstart
